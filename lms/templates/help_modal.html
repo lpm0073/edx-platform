@@ -165,16 +165,29 @@ $(document).ready(function() {
             event.preventDefault();
             DialogTabControls.initializeTabKeyValues("#feedback_form_wrapper", $closeButton);
             $("#feedback_form input[name='issue_type']").val(issue_type);
-            $("#feedback_form_wrapper header").html("<h2>" + title + "</h2><hr>");
-            $("#feedback_form_wrapper label[data-field='subject']").html(subject_label);
-            $("#feedback_form_wrapper label[data-field='details']").html(details_label);
+            edx.HtmlUtils.setHtml(
+                $("#feedback_form_wrapper header"), 
+                edx.HtmlUtils.joinHtml(
+                    edx.HtmlUtils.HTML("<h2>"),
+                    title,
+                    edx.HtmlUtils.HTML("</h2><hr>")
+                )
+            )
+            edx.HtmlUtils.setHtml($("#feedback_form_wrapper label[data-field='subject']"), edx.HtmlUtils.HTML(subject_label))
+            edx.HtmlUtils.setHtml($("#feedback_form_wrapper label[data-field='details']"), edx.HtmlUtils.HTML(details_label))
             if (userAuthenticated && finishedLoadingCourseOptions && courseOptions.length > 1) {
-                $('.js-course-id-anchor').html([
-                    '<label for="feedback_form_course">' + '${_("Course") | n, js_escaped_string}' + '</label>',
+                course_options_html = [
+                    edx.HtmlUtils.joinHtml(
+                        edx.HtmlUtils.HTML('<label for="feedback_form_course">'),
+                        gettext('Course'),
+                        edx.HtmlUtils.HTML('</label>'),
+                    ),
                     '<select name="course_id" id="feedback_form_course" class="feedback-form-select">',
                     courseOptions.join(''),
                     '</select>'
-                ].join(''));
+                ].join('');
+
+                edx.HtmlUtils.setHtml($('.js-course-id-anchor'), edx.HtmlUtils.HTML(course_options_html))
             }
             $("#help_wrapper").css("display", "none");
             $("#feedback_form_wrapper").css("display", "block");
@@ -233,11 +246,22 @@ $(document).ready(function() {
             });
         },
         buildCourseOption = function(courseName, courseId, selected) {
-            var option = '<option value="' + _.escape(courseId) + '"';
+            var option = edx.HtmlUtils.joinHtml(
+                edx.HtmlUtils.HTML('<option value="'),
+                _.escape(courseId),
+                edx.HtmlUtils.HTML('"'),
+            )
+
             if (selected) {
                 option += ' selected';
             }
-            option += '>' + _.escape(courseName) + '</option>';
+            edx.HtmlUtils.joinHtml(
+                option,
+                edx.HtmlUtils.HTML('>'),
+                _.escape(courseName),
+                edx.HtmlUtils.HTML('</option>'),
+            )
+
             return option;
         };
 
@@ -317,6 +341,7 @@ $(document).ready(function() {
     });
     $feedbackForm.on("ajax:error", function(event, xhr, status, error) {
         $(".field-error").removeClass("field-error").removeAttr("aria-invalid");
+        var feedbackError = $("#feedback_error");
         var responseData;
         try {
             responseData = jQuery.parseJSON(xhr.responseText);
@@ -324,7 +349,8 @@ $(document).ready(function() {
         }
         if (responseData) {
             $("[data-field='"+responseData.field+"']").addClass("field-error").attr("aria-invalid", "true");
-            $("#feedback_error").html(responseData.error).stop().css("display", "block");
+            edx.HtmlUtils.setHtml(feedbackError, edx.HtmlUtils.HTML(htmlStr));
+            feedbackError.stop().css("display", "block");
         } else {
             // If no data (or malformed data) is returned, a server error occurred
             htmlStr = "${_('An error has occurred.') | n, js_escaped_string}";
@@ -338,7 +364,8 @@ $(document).ready(function() {
             // ask the user to try again later
             htmlStr += " " + "${_('Please try again later.') | n, js_escaped_string}";
 % endif
-            $("#feedback_error").html(htmlStr).stop().css("display", "block");
+            edx.HtmlUtils.setHtml(feedbackError, edx.HtmlUtils.HTML(htmlStr));
+            feedbackError.stop().css("display", "block");
 % if settings.FEEDBACK_SUBMISSION_EMAIL:
             $("#feedback_email").click(function(e) {
                 mailto = "mailto:" + "${settings.FEEDBACK_SUBMISSION_EMAIL | n, js_escaped_string}" +
