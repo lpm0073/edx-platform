@@ -30,6 +30,12 @@ from openedx.core.djangoapps.plugins import plugin_settings, constants as plugin
 from openedx.core.lib.derived import derive_settings
 from openedx.core.lib.tempdir import mkdtemp_clean
 
+# This is a temporary hack to get past the improperly configured error.
+# xblock mixins aren't loaded as a part of importing common, we should
+# be able to put this back after the imports.
+# Dummy secret key for dev
+SECRET_KEY = '85920908f28904ed733fe576320db18cabd7b6cd'
+
 from .common import *
 
 from util.db import NoOpMigrationModules  # pylint: disable=wrong-import-order
@@ -234,9 +240,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     },
 }
-
-# Dummy secret key for dev
-SECRET_KEY = '85920908f28904ed733fe576320db18cabd7b6cd'
 
 ############################# SECURITY SETTINGS ################################
 # Default to advanced security in common.py, so tests can reset here to use
