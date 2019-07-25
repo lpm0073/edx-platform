@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 # define custom states used by InstructorTask
 QUEUING = 'QUEUING'
 PROGRESS = 'PROGRESS'
+TASK_INPUT_LENGTH = 10000
 
 
 class InstructorTask(models.Model):
@@ -100,6 +101,16 @@ class InstructorTask(models.Model):
         # create the task_id here, and pass it into celery:
         task_id = str(uuid4())
         json_task_input = json.dumps(task_input)
+
+        # check length of task_input, and return an exception if it's too long
+        if len(json_task_input) > TASK_INPUT_LENGTH:
+            error_msg = u'Task input longer than "{length}": "{input}" for "{task}" of "{course}"'.format(
+                length=TASK_INPUT_LENGTH,
+                input=json_task_input,
+                task=task_type,
+                course=course_id
+            )
+            raise ValueError(error_msg)
 
         # create the task, then save it:
         instructor_task = cls(
