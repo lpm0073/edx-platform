@@ -859,7 +859,7 @@ def course_about(request, course_id):
         can_add_course_to_cart = _is_shopping_cart_enabled and registration_price and not ecommerce_checkout_link
 
         # Used to provide context to message to student if enrollment not allowed
-        can_enroll = bool(has_access(request.user, 'enroll', course))
+        can_enroll = bool(request.user.has_perm('course_modes.enroll_in_course', course))
         invitation_only = course.invitation_only
         is_course_full = CourseEnrollment.objects.is_course_full(course)
 
