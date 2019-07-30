@@ -36,7 +36,6 @@ from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.fields import Scope, String
 
-import courseware.views.views as views
 import shoppingcart
 from capa.tests.response_xml_factory import MultipleChoiceResponseXMLFactory
 from course_modes.models import CourseMode
@@ -69,6 +68,7 @@ from openedx.core.djangoapps.credit.api import set_credit_requirements
 from openedx.core.djangoapps.credit.models import CreditCourse, CreditProvider
 from openedx.core.djangoapps.waffle_utils.testutils import WAFFLE_TABLES, override_waffle_flag
 from openedx.core.djangolib.testing.utils import get_mock_request
+from openedx.core.djangoapps.zendesk_proxy import utils
 from openedx.core.lib.gating import api as gating_api
 from openedx.core.lib.url_utils import quote_slashes
 from openedx.features.content_type_gating.models import ContentTypeGatingConfig
@@ -846,8 +846,8 @@ class ViewsTestCase(ModuleStoreTestCase):
         url = reverse('submit_financial_assistance_request')
         return self.client.post(url, json.dumps(data), content_type='application/json')
 
-    @patch.object(views, '_record_feedback_in_zendesk')
-    def test_submit_financial_assistance_request(self, mock_record_feedback):
+    @patch.object(utils, 'create_zendesk_ticket')
+    def test_submit_financial_assistance_request(self, mock_create_zendesk_ticket):
         username = self.user.username
         course = six.text_type(self.course_key)
         legal_name = 'Jesse Pinkman'
@@ -871,7 +871,7 @@ class ViewsTestCase(ModuleStoreTestCase):
         response = self._submit_financial_assistance_form(data)
         self.assertEqual(response.status_code, 204)
 
-        __, __, ticket_subject, __, tags, additional_info = mock_record_feedback.call_args[0]
+        __, __, ticket_subject, __, tags, additional_info = mock_create_zendesk_ticket.call_args[0]
         mocked_kwargs = mock_record_feedback.call_args[1]
         group_name = mocked_kwargs['group_name']
         require_update = mocked_kwargs['require_update']
@@ -893,8 +893,8 @@ class ViewsTestCase(ModuleStoreTestCase):
         self.assertEqual(group_name, 'Financial Assistance')
         self.assertTrue(require_update)
 
-    @patch.object(views, '_record_feedback_in_zendesk', return_value=False)
-    def test_zendesk_submission_failed(self, _mock_record_feedback):
+    @patch.object(utils, 'create_zendesk_ticket', return_value=500)
+    def test_zendesk_submission_failed(self, _mock_create_zendesk_ticket):
         response = self._submit_financial_assistance_form({
             'username': self.user.username,
             'course': six.text_type(self.course.id),

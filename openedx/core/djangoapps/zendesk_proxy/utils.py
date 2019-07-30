@@ -26,6 +26,7 @@ def _get_request_headers():
         'Authorization': u"Bearer {}".format(settings.ZENDESK_OAUTH_ACCESS_TOKEN),
     }
 
+
 def create_zendesk_ticket(requester_name, requester_email, subject, body, group=None, custom_fields=None, uploads=None, tags=None, additional_info=None):
     """
     Create a Zendesk ticket via API.
@@ -104,7 +105,7 @@ def get_zendesk_group_by_name(name):
                 return group['id']
     except Exception as e:  # pylint: disable=broad-except
         log.exception(_std_error_message('Internal server error', 'None'))
-    
+
         return status.HTTP_500_INTERNAL_SERVER_ERROR
     log.exception(_std_error_message('Tried to get zendesk group which does not exist', name))
     raise Exception
@@ -113,7 +114,7 @@ def get_zendesk_group_by_name(name):
 def post_additional_info_as_comment(ticket_id, additional_info):
     """
     Post the Additional Provided as a comment, So that it is only visible
-    to management and not students. 
+    to management and not students.
     """
     additional_info_string = (
         u"Additional information:\n\n" +

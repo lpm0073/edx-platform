@@ -1648,7 +1648,7 @@ def financial_assistance_request(request):
         group='Financial Assistance',
     )
 
-    if not zendesk_submitted:
+    if not zendesk_submitted == 200:
         # The call to Zendesk failed. The frontend will display a
         # message to the user.
         return HttpResponse(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
