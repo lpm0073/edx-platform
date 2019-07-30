@@ -29,6 +29,7 @@ from six import text_type
 
 from course_modes.models import CourseMode
 from edxmako.shortcuts import render_to_response
+from enrollment.permissions import PERM_ENROLL_IN_COURSE
 from lms.djangoapps.commerce.utils import EcommerceService
 from lms.djangoapps.experiments.utils import get_experiment_user_metadata_context
 from openedx.core.djangoapps.catalog.utils import get_currency_data
@@ -258,7 +259,7 @@ class ChooseModeView(View):
         # This is a bit redundant with logic in student.views.change_enrollment,
         # but I don't really have the time to refactor it more nicely and test.
         course = modulestore().get_course(course_key)
-        if not user.has_perm('course_modes.enroll_in_course', course):
+        if not user.has_perm(PERM_ENROLL_IN_COURSE, course):
             error_msg = _("Enrollment is closed")
             return self.get(request, course_id, error=error_msg)
 

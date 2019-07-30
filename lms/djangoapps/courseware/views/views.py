@@ -61,6 +61,8 @@ from courseware.url_helpers import get_redirect_url
 from courseware.user_state_client import DjangoXBlockUserStateClient
 from edxmako.shortcuts import marketing_link, render_to_response, render_to_string
 from ipware.ip import get_ip
+
+from enrollment.permissions import PERM_ENROLL_IN_COURSE
 from lms.djangoapps.ccx.custom_exception import CCXLocatorValidationException
 from lms.djangoapps.certificates import api as certs_api
 from lms.djangoapps.certificates.models import CertificateStatuses
@@ -859,7 +861,7 @@ def course_about(request, course_id):
         can_add_course_to_cart = _is_shopping_cart_enabled and registration_price and not ecommerce_checkout_link
 
         # Used to provide context to message to student if enrollment not allowed
-        can_enroll = bool(request.user.has_perm('course_modes.enroll_in_course', course))
+        can_enroll = bool(request.user.has_perm(PERM_ENROLL_IN_COURSE, course))
         invitation_only = course.invitation_only
         is_course_full = CourseEnrollment.objects.is_course_full(course)
 

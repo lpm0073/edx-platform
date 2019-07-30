@@ -22,11 +22,11 @@ from requests.exceptions import ConnectionError, Timeout
 from six.moves.urllib.parse import urljoin, urlparse, urlunparse  # pylint: disable=import-error
 
 from course_modes.models import CourseMode
+from enrollment.permissions import PERM_ENROLL_IN_COURSE
 from entitlements.models import CourseEntitlement
 from lms.djangoapps.certificates import api as certificate_api
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.commerce.utils import EcommerceService
-from lms.djangoapps.courseware.access import has_access
 from lms.djangoapps.grades.api import CourseGradeFactory
 from openedx.core.djangoapps.catalog.utils import get_fulfillable_course_runs_for_entitlement, get_programs
 from openedx.core.djangoapps.certificates.api import available_date_for_certificate
@@ -841,7 +841,7 @@ class ProgramMarketingDataExtender(ProgramDataExtender):
         return {name for name in chain(cls.__dict__, ProgramDataExtender.__dict__) if name.startswith(prefix)}
 
     def _attach_course_run_can_enroll(self, run_mode):
-        run_mode['can_enroll'] = bool(has_access(self.user, 'enroll', self.course_overview))
+        run_mode['can_enroll'] = bool(self.user.has_perm(PERM_ENROLL_IN_COURSE, self.course_overview))
 
     def _attach_course_run_certificate_url(self, run_mode):
         """

@@ -60,6 +60,7 @@ from courseware.models import (
     DynamicUpgradeDeadlineConfiguration,
     OrgDynamicUpgradeDeadlineConfiguration
 )
+from enrollment.permissions import PERM_ENROLL_IN_COURSE
 from lms.djangoapps.certificates.models import GeneratedCertificate
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
@@ -1255,7 +1256,7 @@ class CourseEnrollment(models.Model):
 
         Arguments:
             user (User): the user for whom we want the program enrollment
-            coure_id (CourseKey): the id of the course the user has a course enrollment in
+            course_id (CourseKey): the id of the course the user has a course enrollment in
 
         Returns:
             ProgramEnrollment object or None
@@ -1272,7 +1273,7 @@ class CourseEnrollment(models.Model):
         Returns a boolean value regarding whether the user has access to enroll in the course. Returns False if the
         enrollment has been closed.
         """
-        return not user.has_perm('course_modes.enroll_in_course', course)
+        return not user.has_perm(PERM_ENROLL_IN_COURSE, course)
 
     def update_enrollment(self, mode=None, is_active=None, skip_refund=False):
         """
